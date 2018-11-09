@@ -1,6 +1,11 @@
 import * as constants from './constants';
 import axios from 'axios';
-import { fromJS } from 'immutable';
+
+const changeList = (data) => ({
+    type: constants.CHANGE_LIST,
+    data,
+    totalPage: Math.ceil(data.length/10)
+});
 
 export const searchFocus = () => ({
     type: constants.SEARCH_FOCUS
@@ -10,9 +15,12 @@ export const searchBlur = () => ({
     type: constants.SEARCH_BLUR
 });
 
-export const changeList = (data) => ({
-    type: constants.CHANGE_LIST,
-    data: fromJS(data)
+export const mouseIn = () => ({
+    type: constants.MOUSE_IN
+});
+
+export const mouseOut = () => ({
+    type: constants.MOUSE_OUT
 });
 
 export const getList = () => {
@@ -24,3 +32,8 @@ export const getList = () => {
         });
     };
 };
+
+export const changePage = (page) => ({
+    type: constants.CHANGE_PAGE,
+    page
+});

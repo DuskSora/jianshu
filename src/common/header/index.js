@@ -1,20 +1,30 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { actionCreator } from './store';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { HeaderWrapper, Logo, Nav, NavItem, NavWrapper, NavSearch, Addition, Button, SearchInfo, SearchInfoTitle, SearchInfoSwitch, SearchInfoList, SearchInfoItem } from './style';
 import { CSSTransition } from 'react-transition-group';
 
-class Header extends Component {
+class Header extends PureComponent {
     getListArea() {
-        if (this.props.focused) {
+        const { focused, list, mouseIn, page, totalPage, handleMouseEnter, handleMouseLeave, handleChangePage } = this.props;
+        const newList = list.toJS();
+        const pageList = [];
+        const length = newList.length > page * 10 ? page * 10 : newList.length;
+        if (newList.length > 0) {
+            for(let i = (page - 1) * 10; i < length; i++) {
+                pageList.push(<SearchInfoItem key={newList[i]}>{newList[i]}</SearchInfoItem>);
+            }
+        }
+        if (focused || mouseIn) {
             return (
-                <SearchInfo>
+                <SearchInfo onMouseEnter={() => {handleMouseEnter(mouseIn);}} onMouseLeave={() => {handleMouseLeave(mouseIn);}}>
                     <SearchInfoTitle>
                         热门搜索
-                        <SearchInfoSwitch>换一批</SearchInfoSwitch>
+                        <SearchInfoSwitch onClick={() => {handleChangePage(page, totalPage);}}>换一批</SearchInfoSwitch>
                     </SearchInfoTitle>
                     <SearchInfoList>
-                        {this.props.list.map((item, index) => <SearchInfoItem key={index}>{item}</SearchInfoItem>)}
+                        {pageList}
                     </SearchInfoList>
                 </SearchInfo>
             );
@@ -22,9 +32,12 @@ class Header extends Component {
     }
 
     render() {
+        const { focused, list, handleInpuFocus, handleInputBlur } = this.props;
         return (
             <HeaderWrapper>
-                <Logo />
+                <Link to="/">
+                    <Logo />
+                </Link>
                 <Nav>
                     <NavItem className="left active">首页</NavItem>
                     <NavItem className="left">下载App</NavItem>
@@ -34,12 +47,12 @@ class Header extends Component {
                     </NavItem>
                     <NavWrapper>
                         <CSSTransition
-                            in={this.props.focused}
+                            in={focused}
                             timeout={200}
                             classNames="slide">
-                            <NavSearch className={this.props.focused ? 'focused' : ''} onFocus={this.props.handleInpuFocus} onBlur={this.props.handleInputBlur}/>
+                            <NavSearch className={focused ? 'focused' : ''} onFocus={() => {handleInpuFocus(list);}} onBlur={handleInputBlur}/>
                         </CSSTransition>
-                        <i className={this.props.focused ? 'iconfont focused' : 'iconfont'}>&#xe629;</i>
+                        <i className={focused ? 'iconfont focused' : 'iconfont'}>&#xe629;</i>
                         {this.getListArea()}
                     </NavWrapper>
                     <Addition>
@@ -54,17 +67,38 @@ class Header extends Component {
 
 const mapStateToProps = (state) => ({
     focused: state.getIn(['header', 'focused']),
-    list: state.getIn(['header', 'list'])
+    list: state.getIn(['header', 'list']),
+    mouseIn: state.getIn(['header', 'mouseIn']),
+    page: state.getIn(['header', 'page']),
+    totalPage: state.getIn(['header', 'totalPage'])
     // focused: state.get('header').get('focused')
 });
 
 const mapDispatchToProps = (dispatch) => ({
-    handleInpuFocus() {
-        dispatch(actionCreator.getList());
+    handleInpuFocus(list) {
+        (list.size === 0) && dispatch(actionCreator.getList());
         dispatch(actionCreator.searchFocus());
     },
     handleInputBlur() {
         dispatch(actionCreator.searchBlur());
+    },
+    handleMouseEnter(mouseIn) {
+        if (!mouseIn) {
+            dispatch(actionCreator.mouseIn());
+        }
+    },
+    handleMouseLeave(mouseIn) {
+        if (mouseIn) {
+            dispatch(actionCreator.mouseOut());
+        }
+    },
+    handleChangePage(page, totalPage) {
+        if (page >= totalPage) {
+            page = 1;
+        } else {
+            page = page + 1;
+        }
+        dispatch(actionCreator.changePage(page));
     }
 });
 
