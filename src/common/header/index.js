@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { actionCreator } from './store';
+import { actionCreator as loginActionCreator } from '../../pages/login/store';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { HeaderWrapper, Logo, Nav, NavItem, NavWrapper, NavSearch, Addition, Button, SearchInfo, SearchInfoTitle, SearchInfoSwitch, SearchInfoList, SearchInfoItem } from './style';
@@ -32,7 +33,7 @@ class Header extends PureComponent {
     }
 
     render() {
-        const { focused, list, handleInpuFocus, handleInputBlur } = this.props;
+        const { focused, list, loginState, handleInpuFocus, handleInputBlur } = this.props;
         return (
             <HeaderWrapper>
                 <Link to="/">
@@ -41,7 +42,9 @@ class Header extends PureComponent {
                 <Nav>
                     <NavItem className="left active">首页</NavItem>
                     <NavItem className="left">下载App</NavItem>
-                    <NavItem className="right">登录</NavItem>
+                    {
+                        loginState ? <NavItem className="right" onClick={this.props.logout}>退出</NavItem>: <Link to="/login"><NavItem className="right">登录</NavItem></Link>
+                    }
                     <NavItem className="right">
                         <i className="iconfont">&#xe636;</i>
                     </NavItem>
@@ -56,7 +59,9 @@ class Header extends PureComponent {
                         {this.getListArea()}
                     </NavWrapper>
                     <Addition>
-                        <Button className="write iconfont">&#xe615;写文章</Button>
+                        <Link to="/write">
+                            <Button className="write iconfont">&#xe615;写文章</Button>
+                        </Link>
                         <Button className="reg">注册</Button>
                     </Addition>
                 </Nav>
@@ -70,8 +75,9 @@ const mapStateToProps = (state) => ({
     list: state.getIn(['header', 'list']),
     mouseIn: state.getIn(['header', 'mouseIn']),
     page: state.getIn(['header', 'page']),
-    totalPage: state.getIn(['header', 'totalPage'])
+    totalPage: state.getIn(['header', 'totalPage']),
     // focused: state.get('header').get('focused')
+    loginState: state.getIn(['login', 'loginState'])
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -99,6 +105,9 @@ const mapDispatchToProps = (dispatch) => ({
             page = page + 1;
         }
         dispatch(actionCreator.changePage(page));
+    },
+    logout() {
+        dispatch(loginActionCreator.logout());
     }
 });
 

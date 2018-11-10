@@ -9,7 +9,7 @@ class List extends PureComponent {
         return (
             <Fragment>
                 {
-                    this.props.articleList.map((item, index) => (<Link key={item.get('id')} to="/detail"><ListItem><ListInfo><img className="pic" src={item.get('imgUrl')} alt="" /><p className="title">{item.get('title')}</p><p className="desc">{item.get('desc')}</p></ListInfo></ListItem></Link>))
+                    this.props.articleList.map((item, index) => (<Link key={item.get('id')} to={'/detail/' + item.get('id')}><ListItem><ListInfo><img className="pic" src={item.get('imgUrl')} alt="" /><p className="title">{item.get('title')}</p><p className="desc">{item.get('desc')}</p></ListInfo></ListItem></Link>))
                 }
                 <LoadMore onClick={() => {this.props.getMoreList(this.props.articlePage + 1);}}>查看更多</LoadMore>
             </Fragment>
